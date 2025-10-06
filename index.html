@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="registrationApp">
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <style>
+        body {
+            font-family: 'Times new roman', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            margin: 0;
+            padding-top: 50px;
+        }
+        h1 {
+            text-align: center;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        form {
+            background: #ffffffcc;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+            width: 100%;
+            max-width: 420px;
+            backdrop-filter: blur(10px);
+        }
+        div {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            border-color: #ff7e5f;
+            outline: none;
+            box-shadow: 0 0 8px #ff7e5faa;
+        }
+        input.ng-invalid.ng-touched {
+            border-color: #e74c3c;
+            box-shadow: 0 0 6px #e74c3caa;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+            transition: all 0.3s ease;
+            background-size: 200% 200%;
+        }
+        button:hover:not(:disabled) {
+            background-position: right center;
+            box-shadow: 0 6px 16px rgba(255, 107, 107, 0.6);
+        }
+        button:disabled {
+            background-color: #f3b19a;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        span {
+            color: #e74c3c;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .success {
+            background: green;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body ng-controller="RegistrationController">
+    <div ng-if="!submitted">
+        <h1>User Registration</h1>
+        <form name="registrationForm" novalidate ng-submit="submitForm()">
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" ng-model="user.name" required>
+                <span ng-show="registrationForm.name.$error.required && registrationForm.name.$touched">Name is required.</span>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" ng-model="user.email" required>
+                <span ng-show="registrationForm.email.$error.required && registrationForm.email.$touched">Email is required.</span>
+                <span ng-show="registrationForm.email.$error.email && registrationForm.email.$touched">Invalid email format.</span>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" ng-model="user.password" required ng-minlength="6">
+                <span ng-show="registrationForm.password.$error.required && registrationForm.password.$touched">Password is required.</span>
+                <span ng-show="registrationForm.password.$error.minlength && registrationForm.password.$touched">Password must be at least 6 characters.</span>
+            </div>
+            <div>
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" ng-model="user.confirmPassword" required password-match>
+                <span ng-show="registrationForm.confirmPassword.$error.required && registrationForm.confirmPassword.$touched">Confirm password is required.</span>
+                <span ng-show="registrationForm.confirmPassword.$error.passwordMatch && registrationForm.confirmPassword.$touched">Password mismatch.</span>
+            </div>
+            <div ng-if="errorMessage" style="color: red; text-align: center; margin-bottom: 10px;">{{errorMessage}}</div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div ng-if="submitted" class="success">Registered Successfully!</div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script>
+        angular.module('registrationApp', [])
+            .controller('RegistrationController', function($scope) {
+                $scope.submitted = false;
+                $scope.user = {};
+                $scope.errorMessage = '';
+                $scope.submitForm = function() {
+                    if ($scope.registrationForm.$valid) {
+                        $scope.submitted = true;
+                        $scope.errorMessage = '';
+                    } else {
+                        $scope.errorMessage = 'Error: Invalid inputs.';
+                        // Mark all fields as touched to show errors
+                        angular.forEach($scope.registrationForm, function(field) {
+                            if (field && field.$setTouched) {
+                                field.$setTouched();
+                            }
+                        });
+                    }
+                };
+            })
+            .directive('passwordMatch', function() {
+                return {
+                    require: 'ngModel',
+                    link: function(scope, element, attrs, ngModel) {
+                        ngModel.$validators.passwordMatch = function(modelValue, viewValue) {
+                            var password = scope.user.password;
+                            return !password || !modelValue || password === modelValue;
+                        };
+                        scope.$watch('user.password', function() {
+                            ngModel.$validate();
+                        });
+                    }
+                };
+            });
+    </script>
+</body>
+</html>
