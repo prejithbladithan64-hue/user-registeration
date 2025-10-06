@@ -1,0 +1,3 @@
+- [x] Create index.html with AngularJS user registration form including validations and disabled submit button
+- [x] Test the form by opening in browser
+- [x] Add CSS styling to the user interface
